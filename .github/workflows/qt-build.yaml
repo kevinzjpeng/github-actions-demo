@@ -16,7 +16,7 @@ jobs:
         choco install -y mingw --version=12.2.0
         choco install -y make
         choco install -y perl
-        choco install -y python
+        choco install -y python --version=3.12.0
 
     - name: Setup Environment
       shell: cmd
