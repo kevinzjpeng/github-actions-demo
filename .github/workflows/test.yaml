@@ -1,42 +1,47 @@
-name: Build Static Executable with MinGW
+name: Build and Install MinGW-w64 from Source on Windows
 
 on: [push]
 
 jobs:
-  build-static-exe:
+  build-mingw64:
     runs-on: windows-latest
+
     steps:
-      - name: Install Chocolatey
-        shell: pwsh
-        run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install MinGW-w64
-        shell: pwsh
-        run: choco install mingw -y
+    - name: Install dependencies
+      shell: cmd
+      run: |
+        choco install -y make
+        choco install -y git
+        choco install -y wget
+        choco install -y 7zip
 
-      - name: Verify Installation
-        shell: pwsh
-        run: gcc --version
+    - name: Download MinGW-w64 source
+      shell: bash
+      run: |
+        wget https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-v10.0.0.tar.bz2
+        7z x mingw-w64-v10.0.0.tar.bz2
+        7z x mingw-w64-v10.0.0.tar
+        cd mingw-w64-v10.0.0
 
-      - name: Checkout Code
-        uses: actions/checkout@v2
+    - name: Configure MinGW-w64
+      shell: bash
+      run: |
+        ./configure --prefix="$HOME/mingw64" --enable-static --disable-shared
 
-      - name: List Installed Libraries
-        shell: pwsh
-        run: Get-ChildItem -Path C:\ProgramData\mingw64 -Recurse -Filter libgcc.a
+    - name: Build MinGW-w64
+      shell: bash
+      run: |
+        make -j$(nproc)
 
+    - name: Install MinGW-w64
+      shell: bash
+      run: |
+        make install
 
-
-      - name: Compile Static Executable
-        shell: pwsh
-        run: |
-          echo '#include <stdio.h>' > hello.c
-          echo 'int main() { printf("Hello, World!\\n"); return 0; }' >> hello.c
-          gcc -static -o hello.exe hello.c
-
-      - name: Verify Executable
-        shell: pwsh
-        run: .\hello.exe
+    - name: Add MinGW-w64 to PATH
+      shell: bash
+      run: |
+        echo "$HOME/mingw64/bin" >> $GITHUB_PATH
