@@ -1,9 +1,9 @@
-name: Install MinGW-w64
+name: Build Static Executable with MinGW
 
 on: [push]
 
 jobs:
-  install-mingw:
+  build-static-exe:
     runs-on: windows-latest
     steps:
       - name: Install Chocolatey
@@ -20,3 +20,17 @@ jobs:
       - name: Verify Installation
         shell: pwsh
         run: gcc --version
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Compile Static Executable
+        shell: pwsh
+        run: |
+          echo '#include <stdio.h>' > hello.c
+          echo 'int main() { printf("Hello, World!\\n"); return 0; }' >> hello.c
+          gcc -static -o hello.exe hello.c
+
+      - name: Verify Executable
+        shell: pwsh
+        run: .\hello.exe
