@@ -24,6 +24,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: List Installed Libraries
+        shell: pwsh
+        run: dir C:\tools\mingw64\x86_64-w64-mingw32\lib
+
       - name: Compile Static Executable
         shell: pwsh
         run: |
