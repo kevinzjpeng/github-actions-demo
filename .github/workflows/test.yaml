@@ -32,7 +32,9 @@ jobs:
         ls -l
         chmod +x configure
         ./configure --prefix="$HOME/mingw64" --enable-static --disable-shared
-
+        
+        echo "Build now..."
         make -j$(nproc)
+        echo "Install now..."
         make install
         echo "$HOME/mingw64/bin" >> $GITHUB_PATH
