@@ -1,9 +1,9 @@
-name: Build and Install MinGW-w64 from Source on Windows
+name: Build Simple Static QT GUI Using MinGW-w64 and QT 6.5.3
 
 on: [push]
 
 jobs:
-  build-mingw64:
+  build-qt-gui:
     runs-on: windows-latest
 
     steps:
@@ -17,24 +17,24 @@ jobs:
         choco install -y git
         choco install -y wget
         choco install -y 7zip
+        choco install -y mingw
+        choco install -y qt --version=6.5.3
 
-    - name: Download and Extract MinGW-w64 source
+    - name: Set up QT environment
       shell: bash
       run: |
-        wget https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-v10.0.0.tar.bz2
-        7z x mingw-w64-v10.0.0.tar.bz2
-        7z x mingw-w64-v10.0.0.tar
+        echo "C:\Qt\6.5.3\mingw81_64\bin" >> $GITHUB_PATH
 
-    - name: Configure MinGW-w64
+    - name: Build a simple QT GUI
       shell: bash
       run: |
-        cd mingw-w64-v10.0.0
-        ls -l
-        chmod +x configure
-        ./configure --prefix="$HOME/mingw64" --enable-static --disable-shared
-        
-        echo "Build now..."
-        make -j$(nproc)
-        echo "Install now..."
-        make install
-        echo "$HOME/mingw64/bin" >> $GITHUB_PATH
+        echo '#include <QApplication>' > main.cpp
+        echo '#include <QLabel>' >> main.cpp
+        echo 'int main(int argc, char **argv) {' >> main.cpp
+        echo 'QApplication app (argc, argv);' >> main.cpp
+        echo 'QLabel label ("Hello, World!");' >> main.cpp
+        echo 'label.show();' >> main.cpp
+        echo 'return app.exec();' >> main.cpp
+        echo '}' >> main.cpp
+        g++ -o hello_qt main.cpp -I C:/Qt/6.5.3/mingw81_64/include -L C:/Qt/6.5.3/mingw81_64/lib -lQt6Widgets -lQt6Core -lQt6Gui -static
+        ./hello_qt
