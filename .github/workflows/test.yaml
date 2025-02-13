@@ -33,17 +33,6 @@ jobs:
         chmod +x configure
         ./configure --prefix="$HOME/mingw64" --enable-static --disable-shared
 
-    - name: Build MinGW-w64
-      shell: bash
-      run: |
         make -j$(nproc)
-
-    - name: Install MinGW-w64
-      shell: bash
-      run: |
         make install
-
-    - name: Add MinGW-w64 to PATH
-      shell: bash
-      run: |
         echo "$HOME/mingw64/bin" >> $GITHUB_PATH
