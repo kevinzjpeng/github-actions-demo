@@ -1,0 +1,22 @@
+name: Install MinGW-w64
+
+on: [push]
+
+jobs:
+  install-mingw:
+    runs-on: windows-latest
+    steps:
+      - name: Install Chocolatey
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+      - name: Install MinGW-w64
+        shell: pwsh
+        run: choco install mingw -y
+
+      - name: Verify Installation
+        shell: pwsh
+        run: gcc --version
