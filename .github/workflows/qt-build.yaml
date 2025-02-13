@@ -1,0 +1,58 @@
+name: Windows Static Qt Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        # Install Chocolatey packages
+        choco install -y mingw --version=12.2.0
+        choco install -y make
+        choco install -y perl
+        choco install -y python
+
+    - name: Setup Environment
+      shell: cmd
+      run: |
+        setx PATH "%PATH%;C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
+        setx QT_DIR "%CD%\Qt-static"
+
+    - name: Download Qt Source
+      run: |
+        Invoke-WebRequest -Uri "https://download.qt.io/official_releases/qt/6.6/6.6.1/single/qt-everywhere-src-6.6.1.zip" -OutFile "qt-src.zip"
+        7z x qt-src.zip -oqt-src
+
+    - name: Configure Qt
+      shell: cmd
+      run: |
+        cd qt-src
+        configure.bat -prefix %QT_DIR% -static -static-runtime -opensource -confirm-license -platform win32-g++ -opengl desktop -no-feature-networkinterface -nomake examples -nomake tests
+        cd ..
+
+    - name: Build Qt
+      shell: cmd
+      run: |
+        cd qt-src
+        mingw32-make -j4
+        mingw32-make install
+        cd ..
+
+    - name: Build Application
+      shell: cmd
+      run: |
+        set PATH=%PATH%;%QT_DIR%\bin
+        qmake CONFIG+=release
+        mingw32-make -j4
+
+    - name: Archive Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: Application
+        path: release/*.exe
