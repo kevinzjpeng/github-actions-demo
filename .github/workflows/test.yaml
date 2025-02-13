@@ -26,9 +26,9 @@ jobs:
 
       - name: List Installed Libraries
         shell: pwsh
-        run: |
-          cd C:\
-          dir /s libwinpthread.a
+        run: Get-ChildItem -Path C:\ -Recurse -Filter libgcc.a
+
+
 
       - name: Compile Static Executable
         shell: pwsh
