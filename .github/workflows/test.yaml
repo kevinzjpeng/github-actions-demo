@@ -29,6 +29,7 @@ jobs:
     - name: Check for configure script
       shell: bash
       run: |
+        ls
         if [ ! -f ./configure ]; then
           echo "configure script not found. Generating it..."
           autoreconf -i
