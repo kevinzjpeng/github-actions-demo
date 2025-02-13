@@ -25,8 +25,7 @@ jobs:
         7z x mingw-w64-v10.0.0.tar.bz2
         7z x mingw-w64-v10.0.0.tar
         cd mingw-w64-v10.0.0
-        ls
-        cs src
+        chmod +x configure
 
     - name: Configure MinGW-w64
       shell: bash
