@@ -27,7 +27,7 @@ jobs:
       - name: List Installed Libraries
         shell: pwsh
         run: |
-          cd \
+          cd C:\
           dir /s libwinpthread.a
 
       - name: Compile Static Executable
