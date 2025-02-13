@@ -26,7 +26,7 @@ jobs:
 
       - name: List Installed Libraries
         shell: pwsh
-        run: Get-ChildItem -Path C:\ProgramData\ -Recurse -Filter libgcc.a
+        run: Get-ChildItem -Path C:\ProgramData\mingw64 -Recurse -Filter libgcc.a
 
 
 
