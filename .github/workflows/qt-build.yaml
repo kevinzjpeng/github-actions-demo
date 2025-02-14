@@ -1,38 +1,61 @@
-name: Build and Install MinGW-w64 from Source on Windows
+name: Windows Static Qt Build
 
 on: [push]
 
 jobs:
-  build-mingw64:
+  build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Install Dependencies
+      run: |
+        # Install Chocolatey packages
+        choco install -y mingw --version=12.2.0
+        choco install -y make
+        # Use Strawberry Perl instead of Perl from Chocolatey
+        choco install -y strawberryperl
+        # Install CMake
+        choco install -y cmake
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Setup Environment
       shell: cmd
       run: |
-        choco install -y make
-        choco install -y git
-        choco install -y wget
-        choco install -y 7zip
-    - name: Download and Extract MinGW-w64 source
-      shell: bash
+        setx PATH "%PATH%;C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
+        setx QT_DIR "%CD%\Qt-static"
+    - name: Download Qt Source
       run: |
-        wget https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-v10.0.0.tar.bz2
-        7z x mingw-w64-v10.0.0.tar.bz2
-        7z x mingw-w64-v10.0.0.tar
-    - name: Configure MinGW-w64
-      shell: bash
+        Invoke-WebRequest -Uri "https://download.qt.io/archive/qt/6.5/6.5.3/submodules/qtbase-everywhere-src-6.5.3.zip" -OutFile "qtbase-src.zip"
+        7z x qtbase-src.zip -oqtbase-src
+    - name: Configure Qt
+      shell: cmd
       run: |
-        cd mingw-w64-v10.0.0
-        ls -l
-        chmod +x configure
-        ./configure --prefix="$HOME/mingw64" --enable-static --disable-shared
-        
-        echo "Build now..."
-        make -j$(nproc)
-        echo "Install now..."
-        make install
-        echo "$HOME/mingw64/bin" >> $GITHUB_PATH
+        cd qtbase-src
+        mkdir build
+        cd build
+        cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=%QT_DIR% -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF ..
+        cd ..
+    - name: Build Qt
+      shell: cmd
+      run: |
+        cd qtbase-src/build
+        mingw32-make -j4
+        mingw32-make install
+        cd ../..
+    - name: Build Application
+      shell: cmd
+      run: |
+        set PATH=%PATH%;%QT_DIR%\bin
+        qmake CONFIG+=release
+        mingw32-make -j4
+    - name: Archive Binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: Application
+        path: release/*.exe
