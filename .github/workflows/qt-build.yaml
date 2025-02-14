@@ -15,7 +15,8 @@ jobs:
         # Install Chocolatey packages
         choco install -y mingw --version=12.2.0
         choco install -y make
-        choco install -y perl
+        # Use Strawberry Perl instead of Perl from Chocolatey
+        choco install -y strawberryperl
 
     - name: Set up Python
       uses: actions/setup-python@v5
