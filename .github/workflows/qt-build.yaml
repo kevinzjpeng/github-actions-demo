@@ -13,8 +13,7 @@ jobs:
     - name: Install Dependencies
       run: |
         # Install Chocolatey packages
-        choco install -y mingw --version=12.2.0
-        choco install -y make
+        choco install -y ninja
         # Use Strawberry Perl instead of Perl from Chocolatey
         choco install -y strawberryperl
         # Install CMake
@@ -45,7 +44,9 @@ jobs:
             -DFEATURE_icu=OFF ^
             -DFEATURE_opengl=ON ^
             ..
-            
+        ninja
+        ninja install
+        
     - name: Build Qt
       shell: cmd
       run: |
