@@ -31,20 +31,20 @@ jobs:
 
     - name: Download Qt Source
       run: |
-        Invoke-WebRequest -Uri "https://download.qt.io/official_releases/qt/6.6/6.6.1/single/qt-everywhere-src-6.6.1.zip" -OutFile "qt-src.zip"
-        7z x qt-src.zip -oqt-src
+        Invoke-WebRequest -Uri "https://download.qt.io/official_releases/qt/6.5/6.5.3/single/qtbase-everywhere-src-6.5.3.zip" -OutFile "qtbase-src.zip"
+        7z x qtbase-src.zip -oqtbase-src
 
     - name: Configure Qt
       shell: cmd
       run: |
-        cd qt-src
-        configure.bat -prefix %QT_DIR% -static -static-runtime -opensource -confirm-license -platform win32-g++ -opengl desktop -no-feature-networkinterface -nomake examples -nomake tests
+        cd qtbase-src
+        configure.bat -prefix %QT_DIR% -static -static-runtime -opensource -confirm-license -platform win32-g++ -opengl desktop -nomake examples -nomake tests
         cd ..
 
     - name: Build Qt
       shell: cmd
       run: |
-        cd qt-src
+        cd qtbase-src
         mingw32-make -j4
         mingw32-make install
         cd ..
